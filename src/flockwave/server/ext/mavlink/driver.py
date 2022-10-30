@@ -882,6 +882,7 @@ class MAVLinkDriver(UAVDriver):
 
                 for i in range(axes):
                     axis.append(joystick.get_axis(i))
+                    print(f"Axis {i} value: {joystick.get_axis(i)}")
                     # textPrint.tprint(screen, "Axis {} value: {:>6.3f}".format(i, axis))
                 message = spec.rc_channels_override(
                     chan1_raw = int(500 * (axis[2]) + 1500),
