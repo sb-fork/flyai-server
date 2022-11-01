@@ -864,8 +864,8 @@ class MAVLinkDriver(UAVDriver):
                     chan2_raw = 1500,
                     chan3_raw = 1500,
                     chan4_raw = 1500,
-                    chan5_raw = 0,
-                    chan6_raw = 0,
+                    chan5_raw = 1500,
+                    chan6_raw = 1500,
                     chan7_raw = 0,
                     chan8_raw = 0,)
                     for i in range(1000):
@@ -882,15 +882,15 @@ class MAVLinkDriver(UAVDriver):
 
                 for i in range(axes):
                     axis.append(joystick.get_axis(i))
-                    print(f"Axis {i} value: {joystick.get_axis(i)}")
+                    # print(f"Axis {i} value: {joystick.get_axis(i)}")
                     # textPrint.tprint(screen, "Axis {} value: {:>6.3f}".format(i, axis))
                 message = spec.rc_channels_override(
-                    chan1_raw = int(500 * (axis[2]) + 1500),
-                    chan2_raw = int(500 * (axis[3]) + 1500),
-                    chan3_raw = int(-500 * (axis[1]) + 1500),
-                    chan4_raw = int(500 * (axis[0]) + 1500),
-                    chan5_raw = 0,
-                    chan6_raw = 0,
+                    chan1_raw = int(400 * (axis[0]) + 1500),
+                    chan2_raw = int(400 * (axis[1]) + 1500),
+                    chan3_raw = int(-400 * (axis[2]) + 1500),
+                    chan4_raw = int(400 * (axis[3]) + 1500),
+                    chan5_raw = int(400 * (axis[4]) + 1500),
+                    chan6_raw = int(400 * (axis[5]) + 1500),
                     chan7_raw = 0,
                     chan8_raw = 0,
                 )
