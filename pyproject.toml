@@ -77,6 +77,6 @@ collmot = ["skybrush-ext-dock", "skybrush-ext-flockctrl", "skybrush-ext-map-cach
 pro = ["skybrush-ext-map-cache", "skybrush-ext-sidekick", "skybrush-ext-timecode"]
 
 [tool.poetry.scripts]
-skybrushd = "flockwave.server.launcher:start"
+flyaiserverd = "flockwave.server.launcher:start"
 skybrush-gateway = "flockwave.gateway.launcher:start"
 skybrush-proxy = "flockwave.proxy.launcher:start"
