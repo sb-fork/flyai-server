@@ -287,7 +287,7 @@ class DroneShowExtension(Extension):
     def _start_uavs_if_needed(self) -> None:
         assert self.app is not None
         assert self._nursery is not None
-
+        print("!!!!!!!!!! Hi This is start of the show !!!!!!!!!!")
         self._notify_uavs_about_countdown_state(seconds_left=0)
 
         uav_ids = (uav_id for uav_id in self._config.uav_ids if uav_id is not None)
