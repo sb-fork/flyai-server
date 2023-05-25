@@ -14,6 +14,14 @@ category = "main"
 optional = false
 python-versions = ">=3.6"
 
+[[package]]
+name = "scapy"
+version = "2.5.0"
+description = ""
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
 [package.dependencies]
 jeepney = {version = ">=0.6.0,<0.7.0", markers = "sys_platform == \"linux\""}
 pyobjc-core = {version = ">=8.0,<9.0", markers = "sys_platform == \"darwin\""}
