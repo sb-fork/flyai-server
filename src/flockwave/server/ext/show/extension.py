@@ -192,8 +192,13 @@ class DroneShowExtension(Extension):
             if self._should_run_countdown:
                 self._show_tasks.start_soon(self._start_show_when_needed)
                 self._show_tasks.start_soon(self._manage_countdown_before_start)
+            elif self._config.start_method is StartMethod.AUTO and \
+            self._config.authorized_to_start and \
+            self._config.start_time_on_clock and \
+            self._config.clock == "mtc":
+                self._show_tasks.start_soon(self._start_show_when_needed)
 
-        self.log.info(self._config.format())
+        # self.log.info(self._config.format())
 
         assert self.app is not None
         updated_signal = self.app.import_api("signals").get("show:config_updated")
