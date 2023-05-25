@@ -270,7 +270,13 @@ class DroneShowExtension(Extension):
         start_signal = self.app.import_api("signals").get("show:start")
 
         assert self._clock is not None
-        await wait_until(self._clock, seconds=0, edge_triggered=True)
+        if self._config.clock == "mtc":
+            # for i in range(100):
+            t.start()
+            while(tim < self._config.start_time_on_clock):
+                pass
+        else:
+            await wait_until(self._clock, seconds=0, edge_triggered=True)
 
         self._start_uavs_if_needed()
         start_signal.send(self)
