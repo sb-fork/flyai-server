@@ -20,6 +20,20 @@ import time
 
 __all__ = ("construct", "dependencies", "description")
 
+tim = 0
+def handle_packet(packet):
+    if packet.haslayer(UDP) and packet.haslayer(Raw):
+        udp_packet = packet[UDP]
+        if udp_packet.dport == 6454:  # Art-Net port
+            art_net_packet = udp_packet[Raw].load
+            # print(art_net_packet[0:7])
+            # Check for Art-Net timecode packet
+            if art_net_packet[0:7] == b'Art-Net' and art_net_packet[9] == 0x97:
+                timecode = art_net_packet[12:]
+                # print("Art-Net Timecode:", timecode)
+                print(f'time: {int (art_net_packet[17])}: {int (art_net_packet[16])}: {int (art_net_packet[15])}')
+                global tim 
+                tim = 3600 * int (art_net_packet[17]) + 60 * int (art_net_packet[16]) + int (art_net_packet[15])
 
 class DroneShowExtension(Extension):
     """Extension that prepares the server to be able to manage drone shows.
