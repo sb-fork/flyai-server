@@ -271,10 +271,10 @@ class DroneShowExtension(Extension):
 
         assert self._clock is not None
         if self._config.clock == "mtc":
-            # for i in range(100):
             t.start()
             while(tim < self._config.start_time_on_clock):
                 pass
+            t.stop()
         else:
             await wait_until(self._clock, seconds=0, edge_triggered=True)
 
