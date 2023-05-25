@@ -1448,6 +1448,10 @@ pygame = [
     {file = "pygame-2.1.0.tar.gz", hash = "sha256:232e51104db0e573221660d172af8e6fc2c0fda183c5dbf2aa52170f29aa9ec9"},
 ]
 
+scapy = [
+    {file = "scapy-2.5.0.tar.gz", hash = "sha256:5b260c2b754fd8d409ba83ee7aee294ecdbb2c235f9f78fe90bc11cb6e5debc2"}, 
+]
+
 adrenaline = [
     {file = "adrenaline-1.0.0-py3-none-any.whl", hash = "sha256:daa2a9d99d85a36244bb59730b3b955abeab90fdc6d5cd78bf082b5178f5a985"},
     {file = "adrenaline-1.0.0.tar.gz", hash = "sha256:5a0565f08314bc42164c4d4179a84c02ae405bf8d339b77b18f91b5b88a2df8d"},
