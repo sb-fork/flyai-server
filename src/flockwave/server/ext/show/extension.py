@@ -35,6 +35,12 @@ def handle_packet(packet):
                 global tim 
                 tim = 3600 * int (art_net_packet[17]) + 60 * int (art_net_packet[16]) + int (art_net_packet[15])
 
+# Set the network interface to listen on
+interface = "wlp2s0"  # Replace with your network interface name
+
+# Start sniffing packets
+t = AsyncSniffer(iface=interface, prn=handle_packet, filter="udp", store=0)
+
 class DroneShowExtension(Extension):
     """Extension that prepares the server to be able to manage drone shows.
 
