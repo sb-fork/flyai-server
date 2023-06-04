@@ -15,9 +15,31 @@ from flockwave.server.tasks import wait_for_dict_items, wait_until
 from .clock import ClockSynchronizationHandler, ShowClock, ShowEndClock
 from .config import DroneShowConfiguration, LightConfiguration, StartMethod
 from .logging import ShowUploadLoggingMiddleware
+from scapy.all import *
+import time
 
 __all__ = ("construct", "dependencies", "description")
 
+tim = 0
+def handle_packet(packet):
+    if packet.haslayer(UDP) and packet.haslayer(Raw):
+        udp_packet = packet[UDP]
+        if udp_packet.dport == 6454:  # Art-Net port
+            art_net_packet = udp_packet[Raw].load
+            # print(art_net_packet[0:7])
+            # Check for Art-Net timecode packet
+            if art_net_packet[0:7] == b'Art-Net' and art_net_packet[9] == 0x97:
+                timecode = art_net_packet[12:]
+                # print("Art-Net Timecode:", timecode)
+                print(f'time: {int (art_net_packet[17])}: {int (art_net_packet[16])}: {int (art_net_packet[15])}')
+                global tim 
+                tim = 3600 * int (art_net_packet[17]) + 60 * int (art_net_packet[16]) + int (art_net_packet[15])
+
+# Set the network interface to listen on
+interface = "wlp2s0"  # Replace with your network interface name
+
+# Start sniffing packets
+t = AsyncSniffer(iface=interface, prn=handle_packet, filter="udp", store=0)
 
 class DroneShowExtension(Extension):
     """Extension that prepares the server to be able to manage drone shows.
@@ -185,8 +207,13 @@ class DroneShowExtension(Extension):
             if self._should_run_countdown:
                 self._show_tasks.start_soon(self._start_show_when_needed)
                 self._show_tasks.start_soon(self._manage_countdown_before_start)
+            elif self._config.start_method is StartMethod.AUTO and \
+            self._config.authorized_to_start and \
+            self._config.start_time_on_clock and \
+            self._config.clock == "mtc":
+                self._show_tasks.start_soon(self._start_show_when_needed)
 
-        self.log.info(self._config.format())
+        # self.log.info(self._config.format())
 
         assert self.app is not None
         updated_signal = self.app.import_api("signals").get("show:config_updated")
@@ -277,7 +304,13 @@ class DroneShowExtension(Extension):
         start_signal = self.app.import_api("signals").get("show:start")
 
         assert self._clock is not None
-        await wait_until(self._clock, seconds=0, edge_triggered=True)
+        if self._config.clock == "mtc":
+            t.start()
+            while(tim < self._config.start_time_on_clock):
+                pass
+            t.stop()
+        else:
+            await wait_until(self._clock, seconds=0, edge_triggered=True)
 
         self._start_uavs_if_needed()
         start_signal.send(self)
@@ -321,7 +354,7 @@ class DroneShowExtension(Extension):
     def _start_uavs_if_needed(self) -> None:
         assert self.app is not None
         assert self._nursery is not None
-
+        print("!!!!!!!!!! Hi This is start of the show !!!!!!!!!!")
         self._notify_uavs_about_countdown_state(seconds_left=0)
 
         uav_ids = (uav_id for uav_id in self._config.uav_ids if uav_id is not None)

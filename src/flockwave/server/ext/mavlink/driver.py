@@ -73,6 +73,14 @@ from .packets import create_led_control_packet, DroneShowStatus
 from .types import MAVLinkMessage, PacketBroadcasterFn, PacketSenderFn, spec
 from .utils import log_id_for_uav, mavlink_version_number_to_semver
 
+import pygame
+
+pygame.init()
+# Initialize the joysticks.
+pygame.joystick.init()
+
+cancellables = None
+
 __all__ = ("MAVLinkDriver",)
 
 
@@ -771,6 +779,129 @@ class MAVLinkDriver(UAVDriver["MAVLinkUAV"]):
         if not success:
             raise RuntimeError("Landing command failed")
 
+    async def _send_rc_signal_broadcast(self, *, transport=None) -> None:
+        channel = transport_options_to_channel(transport)
+        await self.broadcast_command_long_with_retries(
+            MAVCommand.NAV_LAND, channel=channel
+        )
+
+    async def _send_rc_signal_single(
+        self, uav: "MAVLinkUAV", *, transport=None
+    ) -> None:
+        channel = transport_options_to_channel(transport)
+        success = await self.send_command_long(
+            uav,
+            MAVCommand.DO_SET_MODE,
+            param1=float(1),
+            param2=float(5),
+            param3=float(0),
+            channel=channel,
+        )
+        global cancellables
+        if cancellables:
+            cancellables.cancel()
+            cancellables = None
+            return
+        cancellables = self.app.run_in_background(self.send_rc, uav, channel, cancellable=True) 
+
+    
+    async def send_rc(self, uav, channel, cancel_scope):
+        with cancel_scope:
+            global cancellables
+            k = 0
+            while True:
+                #
+                # EVENT PROCESSING STEP
+                #
+                # Possible joystick actions: JOYAXISMOTION, JOYBALLMOTION, JOYBUTTONDOWN,
+                # JOYBUTTONUP, JOYHATMOTION
+                for event in pygame.event.get(): # User did something.
+                    if event.type == pygame.QUIT: # If user clicked close.
+                        done = True # Flag that we are done so we exit this loop.
+                    elif event.type == pygame.JOYBUTTONDOWN:
+                        pass
+                        # print("Joystick button pressed.")
+                    elif event.type == pygame.JOYBUTTONUP:
+                        pass
+                        # print("Joystick button released.")
+
+                # Get count of joysticks.
+                joystick_count = pygame.joystick.get_count()
+                if joystick_count < 1:
+                    print(joystick_count)
+                    if cancellables:
+                        cancellables.cancel()
+                        cancellables = None
+                    break
+                # # For each joystick:
+                # for i in range(joystick_count):
+                joystick = pygame.joystick.Joystick(0)
+                joystick.init()
+
+                button1 = joystick.get_button(6)
+                button2 = joystick.get_button(7)
+                if button1 > 0 and button2 > 0:
+                    message = spec.rc_channels_override(
+                    chan1_raw = 1500,
+                    chan2_raw = 1500,
+                    chan3_raw = 1500,
+                    chan4_raw = 1500,
+                    chan5_raw = 1500,
+                    chan6_raw = 1500,
+                    chan7_raw = 0,
+                    chan8_raw = 0,)
+                    for i in range(1000):
+                        await self.send_packet(message, uav, channel=channel)
+                    if cancellables:
+                        cancellables.cancel()
+                        cancellables = None
+                    break
+                    
+                # Usually axis run in pairs, up/down for one, and left/right for
+                # the other.
+                axes = joystick.get_numaxes()
+                axis = []
+
+                for i in range(axes):
+                    axis.append(joystick.get_axis(i))
+                    print(f"Axis {5} value: {joystick.get_axis(5)}")
+                    # await sleep(1)
+                    # textPrint.tprint(screen, "Axis {} value: {:>6.3f}".format(i, axis))
+                message = spec.rc_channels_override(
+                    chan1_raw = int(400 * (axis[3]) + 1500), # roll
+                    chan2_raw = int(400 * (axis[4]) + 1500),    # pitch
+                    chan3_raw = int(-400 * (axis[1]) + 1500), # throttle
+                    chan4_raw = int(400 * (axis[0]) + 1500), # yaw
+                    chan5_raw = int(400 * (axis[2]) + 1500),
+                    chan6_raw = int(400 * (axis[5]) + 1500),
+                    chan7_raw = 0,
+                    chan8_raw = 0,
+                )
+                await self.send_packet(message, uav, channel=channel)
+                if k < 500:
+                    color = 'red'
+                elif (k >= 500) and (k < 1000):
+                    color = 'black'
+                else:
+                    k = 0
+                k = k + 1
+                await uav.set_led_color(Color(color), channel=channel, duration=0.1)
+                msg = "rc_cancel"
+                uav.update_status(debug=msg.encode("utf-8"))
+                uav.notify_updated()
+
+    async def _send_mode_signal_single(
+        self, uav: "MAVLinkUAV", num: int  = 5, force: bool = False, *, transport=None
+    ) -> None:
+        channel = transport_options_to_channel(transport)
+        success = await self.send_command_long(
+            uav,
+            MAVCommand.DO_SET_MODE,
+            param1=float(1),
+            param2=float(num),
+            param3=float(0),
+            channel=channel,
+        )
     async def _send_light_or_sound_emission_signal_broadcast(
         self, signals: List[str], duration: int, *, transport=None
     ) -> None:

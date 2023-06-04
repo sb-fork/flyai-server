@@ -97,6 +97,11 @@ UAV_COMMAND_HANDLERS: Dict[str, Tuple[str, MessageBodyTransformationSpec]] = {
         "resume_from_low_power_mode",
         {"transport": TransportOptions.from_json},
     ),
+    "UAV-RC": ("send_rc_signal", {"transport": TransportOptions.from_json}),
+    "UAV-MODE": (
+        "send_mode_signal",
+        {"transport": TransportOptions.from_json},
+    ),
 }
 
 #: Constant for a dummy UAV command handler that does nothing
@@ -1232,6 +1237,8 @@ def handle_UAV_LIST(message: FlockwaveMessage, sender: Client, hub: MessageHub):
     "UAV-TEST",
     "UAV-VER",
     "UAV-WAKEUP",
+    "UAV-RC",
+    "UAV-MODE",
 )
 async def handle_UAV_operations(
     message: FlockwaveMessage, sender: Client, hub: MessageHub

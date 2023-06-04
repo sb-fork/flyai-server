@@ -61,6 +61,7 @@ compose = "^1.1.1"
 adrenaline = "^1.1.0"
 httpx = ">=0.18.2"
 igrf-model = "^1.1.1"
+pygame = "^2.1.0"
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^7.1.0"}
@@ -75,7 +76,7 @@ collmot = ["skybrush-ext-dock", "skybrush-ext-flockctrl", "skybrush-ext-map-cach
 pro = ["skybrush-ext-map-cache", "skybrush-ext-sidekick", "skybrush-ext-timecode"]
 
 [tool.poetry.scripts]
-skybrushd = "flockwave.server.launcher:start"
+flyaiserverd = "flockwave.server.launcher:start"
 skybrush-gateway = "flockwave.gateway.launcher:start"
 skybrush-proxy = "flockwave.proxy.launcher:start"
 
