@@ -2238,10 +2238,6 @@ pro = ["skybrush-ext-map-cache", "skybrush-ext-sidekick", "skybrush-ext-timecode
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-<<<<<<< HEAD
-content-hash = "5157648c5409f58b4865f886c67220c4e51eaec4a68e0b040b5a31df69a7b201"
-=======
-content-hash = "ae1df5c0291623de31810d12f0d6e17b56283b025b1a62335b3952d1ac288a08"
 
 [metadata.files]
 pygame = [
@@ -3066,4 +3062,3 @@ zipp = [
     {file = "zipp-3.9.0-py3-none-any.whl", hash = "sha256:972cfa31bc2fedd3fa838a51e9bc7e64b7fb725a8c00e7431554311f180e9980"},
     {file = "zipp-3.9.0.tar.gz", hash = "sha256:3a7af91c3db40ec72dd9d154ae18e008c69efe8ca88dde4f9a731bb82fe2f9eb"},
 ]
->>>>>>> midi-test
