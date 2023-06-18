@@ -310,6 +310,8 @@ class DroneShowExtension(Extension):
 
         assert self._clock is not None
         if self._config.clock == "mtc":
+            if tim > self._config.start_time_on_clock:
+                return
             self.app.run_in_background(self.until)
         else:
             await wait_until(self._clock, seconds=0, edge_triggered=True)
