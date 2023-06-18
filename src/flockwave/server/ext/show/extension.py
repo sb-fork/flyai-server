@@ -299,16 +299,18 @@ class DroneShowExtension(Extension):
                 self._clock_sync.disable_and_stop()
                 self._end_clock_sync.disable_and_stop()
 
+    async def until(self):
+        t.start()
+        while(tim < self._config.start_time_on_clock):
+            pass
+        t.stop()
     async def _start_show_when_needed(self) -> None:
         assert self.app is not None
         start_signal = self.app.import_api("signals").get("show:start")
 
         assert self._clock is not None
         if self._config.clock == "mtc":
-            t.start()
-            while(tim < self._config.start_time_on_clock):
-                pass
-            t.stop()
+            self.app.run_in_background(self.until)
         else:
             await wait_until(self._clock, seconds=0, edge_triggered=True)
 
@@ -317,9 +319,10 @@ class DroneShowExtension(Extension):
 
         delay = int(self._clock.seconds * 1000)
         if delay >= 1:
-            self.log.warning(f"Started show with a delay of {delay} ms")
+            self.log.warn(f"Started show with a delay of {delay} ms")
         else:
             self.log.info("Started show accurately")
+
 
     async def _manage_countdown_before_start(self) -> None:
         assert self._clock is not None
@@ -360,7 +363,11 @@ class DroneShowExtension(Extension):
         uav_ids = (uav_id for uav_id in self._config.uav_ids if uav_id is not None)
         uavs_by_drivers = self.app.sort_uavs_by_drivers(uav_ids)
         for driver, uavs in uavs_by_drivers.items():
-            results = driver.send_takeoff_signal(uavs, scheduled=True)
+            print(uavs)
+            if self._config.clock == "mtc":
+                results = driver.send_takeoff_signal(uavs, scheduled=False)
+            else:
+                results = driver.send_takeoff_signal(uavs, scheduled=True)
             self._nursery.start_soon(
                 self._process_command_results_in_background, results, "start signals"
             )
