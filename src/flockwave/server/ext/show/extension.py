@@ -16,11 +16,29 @@ from .clock import ClockSynchronizationHandler, ShowClock, ShowEndClock
 from .config import DroneShowConfiguration, LightConfiguration, StartMethod
 from .logging import ShowUploadLoggingMiddleware
 from scapy.all import *
+# import time
+import socket
+import struct
 import time
 
 __all__ = ("construct", "dependencies", "description")
 
 tim = 0
+def broadcast_artnet_timecode(ip_address, port, hours, minutes, seconds, frames):
+    # Create a UDP socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    
+    # Set the socket options to allow broadcasting
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    
+    # Art-Net timecode packet structure
+    packet = struct.pack('!7sBHHBBBB', b'Art-Net', 0x00, 0x0140, 0x0000, hours, minutes, seconds, frames)
+    
+    # Broadcast the Art-Net timecode packet
+    sock.sendto(packet, (ip_address, port))
+    
+    # Close the socket
+    sock.close()
 def handle_packet(packet):
     if packet.haslayer(UDP) and packet.haslayer(Raw):
         udp_packet = packet[UDP]
@@ -318,6 +336,13 @@ class DroneShowExtension(Extension):
 
         self._start_uavs_if_needed()
         start_signal.send(self)
+        ip_address = '255.255.255.255'  # Broadcast IP address
+        port = 6454  # Art-Net default port
+        hours = 0
+        minutes = 0
+        seconds = 0
+        frames = 0
+        broadcast_artnet_timecode(ip_address, port, hours, minutes, seconds, frames)
 
         delay = int(self._clock.seconds * 1000)
         if delay >= 1:
