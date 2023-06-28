@@ -24,7 +24,7 @@ import time
 __all__ = ("construct", "dependencies", "description")
 
 tim = 0
-def broadcast_artnet_timecode(ip_address, port, hours, minutes, seconds, frames):
+def broadcast_artnet_timecode(ip_address, port, hours, minutes, seconds, frames, type=3):
     # Create a UDP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     
@@ -32,7 +32,7 @@ def broadcast_artnet_timecode(ip_address, port, hours, minutes, seconds, frames)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     
     # Art-Net timecode packet structure
-    packet = struct.pack('!7sBHHBBBB', b'Art-Net', 0x00, 0x0140, 0x0000, hours, minutes, seconds, frames)
+    packet = struct.pack('!14sBBBBB', b'Art-Net\x00\x00\x97\x00\x0e\x00\x00', hours, minutes, seconds, frames, type)
     
     # Broadcast the Art-Net timecode packet
     sock.sendto(packet, (ip_address, port))
