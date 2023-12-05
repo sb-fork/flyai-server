@@ -798,7 +798,6 @@ class MAVLinkDriver(UAVDriver["MAVLinkUAV"]):
             channel=channel,
         )
         global cancellables
-        print("clicked")
         if cancellables.get(uav):
             cancellables[uav].cancel()
             cancellables.pop(uav)
@@ -827,60 +826,59 @@ class MAVLinkDriver(UAVDriver["MAVLinkUAV"]):
                 #         pass
                 #         # print("Joystick button released.")
 
-                # # Get count of joysticks.
-                # joystick_count = pygame.joystick.get_count()
-                # if joystick_count < 1:
-                #     print(joystick_count)
+                # Get count of joysticks.
+                joystick_count = pygame.joystick.get_count()
+                if joystick_count < 1:
+                    print(joystick_count)
+                    if cancellables.get(uav):
+                        cancellables[uav].cancel()
+                        cancellables.pop(uav)
+                    break
+                # # For each joystick:
+                # for i in range(joystick_count):
+                joystick = pygame.joystick.Joystick(0)
+                joystick.init()
+
+                # button1 = joystick.get_button(6)
+                # button2 = joystick.get_button(7)
+                # if button1 > 0 and button2 > 0:
+                #     message = spec.rc_channels_override(
+                #     chan1_raw = 1500,
+                #     chan2_raw = 1500,
+                #     chan3_raw = 1500,
+                #     chan4_raw = 1500,
+                #     chan5_raw = 1500,
+                #     chan6_raw = 1500,
+                #     chan7_raw = 0,
+                #     chan8_raw = 0,)
+                #     for i in range(1000):
+                #         await self.send_packet(message, uav, channel=channel)
                 #     if cancellables:
                 #         cancellables.cancel()
                 #         cancellables = None
                 #     break
-                # # # For each joystick:
-                # # for i in range(joystick_count):
-                # joystick = pygame.joystick.Joystick(0)
-                # joystick.init()
-
-                # # button1 = joystick.get_button(6)
-                # # button2 = joystick.get_button(7)
-                # # if button1 > 0 and button2 > 0:
-                # #     message = spec.rc_channels_override(
-                # #     chan1_raw = 1500,
-                # #     chan2_raw = 1500,
-                # #     chan3_raw = 1500,
-                # #     chan4_raw = 1500,
-                # #     chan5_raw = 1500,
-                # #     chan6_raw = 1500,
-                # #     chan7_raw = 0,
-                # #     chan8_raw = 0,)
-                # #     for i in range(1000):
-                # #         await self.send_packet(message, uav, channel=channel)
-                # #     if cancellables:
-                # #         cancellables.cancel()
-                # #         cancellables = None
-                # #     break
                     
-                # # Usually axis run in pairs, up/down for one, and left/right for
-                # # the other.
-                # axes = joystick.get_numaxes()
-                # axis = []
+                # Usually axis run in pairs, up/down for one, and left/right for
+                # the other.
+                axes = joystick.get_numaxes()
+                axis = []
 
-                # for i in range(axes):
-                #     axis.append(joystick.get_axis(i))
-                #     # print(f"Axis {1} value: {joystick.get_axis(1)}")
-                #     # await sleep(1)
-                #     # textPrint.tprint(screen, "Axis {} value: {:>6.3f}".format(i, axis))
-                # message = spec.rc_channels_override(
-                #     chan1_raw = int(400 * (axis[3]) + 1500), # roll
-                #     chan2_raw = int(400 * (axis[4]) + 1500),    # pitch
-                #     chan3_raw = int(-400 * (axis[1]) + 1500), # throttle
-                #     chan4_raw = int(400 * (axis[0]) + 1500), # yaw
-                #     chan5_raw = int(400 * (axis[2]) + 1500),
-                #     chan6_raw = int(400 * (axis[5]) + 1500),
-                #     chan7_raw = 0,
-                #     chan8_raw = 0,
-                # )
-                # print(message)
-                # await self.send_packet(message, uav, channel=channel)
+                for i in range(axes):
+                    axis.append(joystick.get_axis(i))
+                    # print(f"Axis {1} value: {joystick.get_axis(1)}")
+                    # await sleep(1)
+                    # textPrint.tprint(screen, "Axis {} value: {:>6.3f}".format(i, axis))
+                message = spec.rc_channels_override(
+                    chan1_raw = int(400 * (axis[3]) + 1500), # roll
+                    chan2_raw = int(400 * (axis[4]) + 1500),    # pitch
+                    chan3_raw = int(-400 * (axis[1]) + 1500), # throttle
+                    chan4_raw = int(400 * (axis[0]) + 1500), # yaw
+                    chan5_raw = int(400 * (axis[2]) + 1500),
+                    chan6_raw = int(400 * (axis[5]) + 1500),
+                    chan7_raw = 0,
+                    chan8_raw = 0,
+                )
+                await self.send_packet(message, uav, channel=channel)
                 if k < 500:
                     color = 'red'
                 elif (k >= 500) and (k < 1000):
