@@ -813,50 +813,50 @@ class MAVLinkDriver(UAVDriver["MAVLinkUAV"]):
             while True:
                 #
                 # EVENT PROCESSING STEP
-                #
+                #   
                 # Possible joystick actions: JOYAXISMOTION, JOYBALLMOTION, JOYBUTTONDOWN,
                 # JOYBUTTONUP, JOYHATMOTION
-                # for event in pygame.event.get(): # User did something.
-                #     if event.type == pygame.QUIT: # If user clicked close.
-                #         done = True # Flag that we are done so we exit this loop.
-                #     elif event.type == pygame.JOYBUTTONDOWN:
-                #         pass
-                #         # print("Joystick button pressed.")
-                #     elif event.type == pygame.JOYBUTTONUP:
-                #         pass
-                #         # print("Joystick button released.")
+                for event in pygame.event.get(): # User did something.
+                    if event.type == pygame.QUIT: # If user clicked close.
+                        done = True # Flag that we are done so we exit this loop.
+                    elif event.type == pygame.JOYBUTTONDOWN:
+                        pass
+                        # print("Joystick button pressed.")
+                    elif event.type == pygame.JOYBUTTONUP:
+                        pass
+                        # print("Joystick button released.")
 
                 # Get count of joysticks.
                 joystick_count = pygame.joystick.get_count()
                 if joystick_count < 1:
                     print(joystick_count)
-                    if cancellables.get(uav):
-                        cancellables[uav].cancel()
-                        cancellables.pop(uav)
+                    if cancellables:
+                        cancellables.cancel()
+                        cancellables = None
                     break
                 # # For each joystick:
                 # for i in range(joystick_count):
                 joystick = pygame.joystick.Joystick(0)
                 joystick.init()
 
-                # button1 = joystick.get_button(6)
-                # button2 = joystick.get_button(7)
-                # if button1 > 0 and button2 > 0:
-                #     message = spec.rc_channels_override(
-                #     chan1_raw = 1500,
-                #     chan2_raw = 1500,
-                #     chan3_raw = 1500,
-                #     chan4_raw = 1500,
-                #     chan5_raw = 1500,
-                #     chan6_raw = 1500,
-                #     chan7_raw = 0,
-                #     chan8_raw = 0,)
-                #     for i in range(1000):
-                #         await self.send_packet(message, uav, channel=channel)
-                #     if cancellables:
-                #         cancellables.cancel()
-                #         cancellables = None
-                #     break
+                button1 = joystick.get_button(6)
+                button2 = joystick.get_button(7)
+                if button1 > 0 and button2 > 0:
+                    message = spec.rc_channels_override(
+                    chan1_raw = 1500,
+                    chan2_raw = 1500,
+                    chan3_raw = 1500,
+                    chan4_raw = 1500,
+                    chan5_raw = 1500,
+                    chan6_raw = 1500,
+                    chan7_raw = 0,
+                    chan8_raw = 0,)
+                    for i in range(1000):
+                        await self.send_packet(message, uav, channel=channel)
+                    if cancellables.get(uav):
+                            cancellables[uav].cancel()
+                            cancellables.pop(uav)
+                    break
                     
                 # Usually axis run in pairs, up/down for one, and left/right for
                 # the other.
@@ -865,7 +865,7 @@ class MAVLinkDriver(UAVDriver["MAVLinkUAV"]):
 
                 for i in range(axes):
                     axis.append(joystick.get_axis(i))
-                    # print(f"Axis {1} value: {joystick.get_axis(1)}")
+                    # print(f"Axis {5} value: {joystick.get_axis(5)}")
                     # await sleep(1)
                     # textPrint.tprint(screen, "Axis {} value: {:>6.3f}".format(i, axis))
                 message = spec.rc_channels_override(
